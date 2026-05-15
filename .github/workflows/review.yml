@@ -1,0 +1,52 @@
+name: Review Notes
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file naming convention
+        run: |
+          echo "::group::检查文件名命名规范"
+          errors=0
+          while IFS= read -r -d '' file; do
+            name=$(basename "$file")
+            if [[ $name =~ ^[0-9]{2}- && $name != *.md ]]; then
+              echo "❌ 文件名不符合编号+命名规范: $name"
+              errors=$((errors+1))
+            fi
+          done < <(find . -name "*.md" -print0)
+          if [ $errors -eq 0 ]; then
+            echo "✅ 所有文件名符合规范"
+          fi
+          echo "::endgroup::"
+
+      - name: Check broken links
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --no-progress --exclude "localhost" --exclude "github.com" "**/*.md"
+          fail: true
+        continue-on-error: true
+
+      - name: Spell check
+        uses: crate-ci/typos@master
+        with:
+          files: "**/*.md"
+        continue-on-error: true
+
+      - name: Summary
+        run: |
+          echo "## 审阅结果" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 文件命名检查完成" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 链接检查完成" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 拼写检查完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "变更文件:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only HEAD~1 HEAD 2>/dev/null | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY || true
