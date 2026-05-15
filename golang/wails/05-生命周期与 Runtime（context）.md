@@ -1,59 +1,155 @@
-# 05 生命周期与 Runtime（context）
+# 生命周期与 Runtime（context）
 
-## 5.1 Runtime 包
+## context 就是"遥控器"
 
-Wails 的 Go Runtime 包：
+Wails 的 `context.Context` 不是传统 Go 里用来做超时取消的 context，它在 Wails 里是**调用 Runtime API 的通行证**。没有它，你就不能操作窗口、发事件、弹对话框。
+
+### context 的保存
 
 ```go
-import "github.com/wailsapp/wails/v2/pkg/runtime"
+type App struct {
+    ctx context.Context  // 在 OnStartup 保存，全局使用
+}
+
+func (a *App) startup(ctx context.Context) {
+    a.ctx = ctx  // 存起来，后面的 Bind 方法和业务逻辑都用它
+}
 ```
 
-该包中多数方法都要求把 `context.Context` 作为第一个参数。
+## 生命周期回调详解
 
-## 5.2 context 的常见获取方式
+### OnStartup（应用启动）
 
-- **应用启动回调（OnStartup）**：通常在这里保存 `ctx` 引用
-- **前端 DOM 加载完成回调（OnDomReady）**：如果你要在“启动时”调用某些 runtime 方法，更建议在这个时机调用
+```go
+OnStartup: func(ctx context.Context) {
+    a.ctx = ctx
+    // 不要在这里调 runtime 方法！窗口还没准备好
+    // ❌ runtime.OpenFileDialog(a.ctx, ...)  // 窗口还没初始化
+    // ✅ 只做数据初始化
+    a.initDatabase()
+    a.loadSettings()
+}
+```
 
-注意：虽然 `ctx` 会传入应用启动回调，但此时窗口仍在初始化，runtime 方法在该回调中不一定可用；如果需要更可靠的时机，请使用“前端 DOM 加载完成回调”。
+### OnDomReady（前端就绪）
 
-参考：
+```go
+OnDomReady: func(ctx context.Context) {
+    // ✅ 窗口已经初始化完毕，可以调 runtime 了
+    // 适合在这里触发初始数据加载
+    runtime.EventsEmit(ctx, "app:ready", nil)
+}
+```
 
-- https://wails.io/zh-Hans/docs/reference/runtime/
+### OnShutdown（应用退出）
 
-## 5.3 生命周期回调
+```go
+OnShutdown: func(ctx context.Context) {
+    a.db.Close()
+    a.saveSettings()
+    a.cancelRunningTasks()
+}
+```
 
-### 5.3.1 应用启动回调（OnStartup）
+### BeforeClose（拦截关闭）
 
-- **时机**：加载 `index.html` 之前
-- **做什么**：框架调用你注册的函数，并传入标准 Go `context`
-- **常见用法**：保存 `ctx` 引用（例如存到结构体字段），供后续 runtime 调用/业务逻辑使用
+```go
+// 在应用选项中配置
+BeforeClose: func(ctx context.Context) bool {
+    // 返回 true 阻止关闭，false 允许关闭
+    // 适合：有未保存的编辑时弹窗确认
+    if a.hasUnsavedChanges {
+        selected, _ := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+            Type:          runtime.QuestionDialog,
+            Title:         "确认退出",
+            Message:       "有未保存的更改，确定退出吗？",
+            DefaultButton: "取消",
+            CancelButton:  "退出",
+        })
+        return selected == "Cancel"  // 点了取消就阻止关闭
+    }
+    return false  // 允许关闭
+}
+```
 
-### 5.3.2 应用退出回调（OnShutdown）
+## 常见坑
 
-- **时机**：应用关闭之前
-- **常见用法**：清理资源（关闭 DB、保存状态、释放系统资源等）
+### 1. OnStartup 里调 runtime 方法不生效
 
-### 5.3.3 前端 DOM 加载完成回调（OnDomReady）
+上面说了，窗口还没初始化。如果你确实需要在启动时调 runtime 方法，有两种选择：
 
-- **时机**：`index.html` 相关资源加载完成后
-- **类比**：类似前端的 `window.onload`
-- **常见用法**：更适合在此时机调用 runtime 方法或触发“需要窗口就绪”的逻辑
+```go
+// 方案一：延迟执行
+OnStartup: func(ctx context.Context) {
+    a.ctx = ctx
+    time.AfterFunc(100*time.Millisecond, func() {
+        runtime.EventsEmit(ctx, "late:start", nil) // 延迟 100ms 等窗口就绪
+    })
+}
 
-### 5.3.4 应用关闭前回调（BeforeClose）
+// 方案二：用 OnDomReady
+OnDomReady: func(ctx context.Context) {
+    runtime.EventsEmit(ctx, "app:ready", nil) // 这个时候窗口肯定就绪了
+}
+```
 
-- **时机**：用户关闭窗口/应用退出之前
-- **用途**：可弹窗确认、阻止关闭或做异步清理
+### 2. context 传给了 goroutine
 
-## 5.4 典型执行顺序
+```go
+func (a *App) LongRunningTask() {
+    go func() {
+        // ✅ 可以把 ctx 传给 goroutine
+        // ctx 在应用生命周期内一直有效
+        for i := 0; i < 100; i++ {
+            runtime.EventsEmit(a.ctx, "task:progress", i)
+        }
+    }()
+}
+```
 
-```text
+但注意：如果应用退出了，ctx 就失效了。goroutine 里要用 `select` 监听 ctx.Done。
+
+### 3. 多个结构体绑定时的 context
+
+如果你的服务层也用了多个结构体，每个都需要 ctx：
+
+```go
+type ImageService struct {
+    ctx context.Context
+}
+
+func (s *ImageService) OnStartup(ctx context.Context) {
+    s.ctx = ctx
+}
+
+func (s *ImageService) LoadImage(path string) *Image {
+    runtime.LogInfo(s.ctx, "加载图片: "+path)
+    // ...
+}
+
+// main.go
+imageService := &ImageService{}
+wails.Run(&options.App{
+    OnStartup: func(ctx context.Context) {
+        app.startup(ctx)
+        imageService.OnStartup(ctx)
+    },
+    Bind: []interface{}{
+        app,
+        imageService,
+    },
+})
+```
+
+## 执行顺序
+
+```
 应用启动
-  -> OnStartup（保存 context）
-  -> 加载 index.html
-  -> OnDomReady（前端资源就绪）
-用户使用应用
-  -> BeforeClose（可阻止关闭）
-  -> OnShutdown（清理资源）
+  → OnStartup（保存 ctx，初始化数据，但不能调 runtime）
+  → 加载 index.html、前端资源
+  → OnDomReady（可以调 runtime 了，通知前端数据加载）
+  → 用户交互（Bind 调用、Events 推送）
+  → BeforeClose（询问是否保存，可选阻止关闭）
+  → OnShutdown（关闭连接，保存设置，清理临时文件）
 应用结束
 ```
