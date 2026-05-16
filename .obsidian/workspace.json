@@ -169,5 +169,8 @@
     }
   },
   "active": "b75b52e70f7572bd",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "golang/04-复合类型.md",
+    "golang/05-结构体与方法.md"
+  ]
 }
