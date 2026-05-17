@@ -181,10 +181,10 @@ docker service create \
   --update-failure-action pause \ # 更新失败时暂停
   --rollback-monitor 20s \       # 回滚监控时间
   --rollback-parallelism 1 \     # 回滚并行数
-  nginx:1.21
+  nginx:1.27
 
 # 触发更新
-docker service update --image nginx:1.23 web
+docker service update --image nginx:1.27 web
 ```
 
 ## Swarm 模式下的 Compose

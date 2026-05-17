@@ -21,7 +21,7 @@ docker compose version
 ### docker-compose.yml 基本结构
 
 ```yaml
-version: "3.8"  # 版本号
+# 新版 Compose 已废弃 version 字段
 
 services:       # 服务定义
   web:
@@ -64,11 +64,11 @@ networks:       # 网络定义
 
 | 版本 | Docker Engine | 主要特性 |
 |------|---------------|----------|
-| 3.8+ | 19.03.0+ | 最新特性 |
-| 3.x | 18.06.0+ | Swarm 支持 |
-| 2.x | 17.06.0+ | 推荐单机使用 |
+| 最新版 | 24.0.0+ | 已废弃 version 字段，直接定义 services |
+| 3.x | 18.06.0+ | Swarm 支持（已淘汰） |
+| 2.x | 17.06.0+ | 推荐单机使用（已淘汰） |
 
-> 最新版 Compose 已废弃 `version` 字段，YAML 根级定义即可。
+> 2023 年起 Compose V2 已废弃 `version` 字段，直接定义 services、volumes 等顶级字段即可。
 
 ## 核心配置项
 

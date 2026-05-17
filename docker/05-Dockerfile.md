@@ -164,7 +164,7 @@ SHELL ["powershell", "-Command"]  # Windows
 
 ```dockerfile
 # 第一阶段：构建应用
-FROM golang:1.21 AS builder
+FROM golang:1.26 AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
