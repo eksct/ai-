@@ -2,7 +2,7 @@
 
 ## 概述
 
-Maven 是 Java 项目的事实标准构建工具，负责依赖管理、编译打包、生命周期管理。生产项目几乎不用 Gradle（少数 Android/大数据项目除外），所以老老实实学 Maven。
+Maven 是 Java 项目的事实标准构建工具，负责依赖管理、编译打包、生命周期管理。Gradle 在某些场景（Android、大数据）也有广泛应用，但企业级后端项目以 Maven 为主流，建议优先掌握 Maven。
 
 ## 核心概念
 
@@ -124,7 +124,7 @@ order-service/
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <configuration>
                         <mainClass>com.example.order.OrderApplication</mainClass>
-                        <!-- 关键：打包时排除 application-prod.yml -->
+                        <!-- 关键：打包时排除 Lombok（provided 依赖无需打入 jar） -->
                         <excludes>
                             <exclude>
                                 <groupId>org.projectlombok</groupId>
@@ -274,7 +274,7 @@ mvn dependency:tree | grep slf4j
 <resources>
     <resource>
         <directory>src/main/resources</directory>
-        <filtering>true</filtering>
+        <filtering>false</filtering>
         <includes>
             <include>**/*.yml</include>
             <include>**/*.xml</include>

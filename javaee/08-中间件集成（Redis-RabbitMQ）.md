@@ -406,7 +406,7 @@ public class OrderConsumer {
         } catch (Exception e) {
             log.error("消息处理失败, orderNo={}", order.getOrderNo(), e);
             // requeue=false，不重新入队，进入死信队列
-            channel.basicNack(tag, false, true);
+            channel.basicNack(tag, false, false);
         }
     }
 }

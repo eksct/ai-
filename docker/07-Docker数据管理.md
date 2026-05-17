@@ -31,7 +31,7 @@ docker volume rm my-volume
 docker volume prune
 
 # 删除所有未使用卷
-docker volume prune -a
+docker volume prune
 ```
 
 ### 使用 Volume

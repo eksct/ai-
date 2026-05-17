@@ -288,15 +288,15 @@ IntStream intStream = Arrays.stream(numbers);
 IntStream.range(0, 100);      // [0, 100)
 IntStream.rangeClosed(0, 99); // [0, 99]
 
-// 数值操作
-intStream.sum();
-intStream.average();
-intStream.max();
-intStream.min();
-intStream.summaryStatistics();
+// 数值操作（每次需重新创建流，流只能消费一次）
+Arrays.stream(numbers).sum();
+Arrays.stream(numbers).average();
+Arrays.stream(numbers).max();
+Arrays.stream(numbers).min();
+Arrays.stream(numbers).summaryStatistics();
 
 // 转换
-Stream<Integer> boxed = intStream.boxed();   // 转 Stream<Integer>
+Arrays.stream(numbers).boxed();   // 转 Stream<Integer>
 
 // mapToInt / mapToLong / mapToDouble
 int totalAge = users.stream()

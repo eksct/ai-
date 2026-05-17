@@ -120,6 +120,8 @@ services:
     restart: unless-stopped
 
     # 资源限制
+    # 注意: deploy.resources 仅在 docker stack deploy（Swarm 模式）下生效
+    # docker compose up 会忽略此配置，请使用 docker run --cpus/--memory 在单机模式限制资源
     deploy:
       resources:
         limits:

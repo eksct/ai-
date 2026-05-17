@@ -89,18 +89,23 @@ docker push registry.example.com/order-service:1.0.0
 
 # 1. 不敏感：提交到代码仓库
 # application.yml（通用配置）
-server.port=8080
-logging.level.root=INFO
+server:
+  port: 8080
+logging:
+  level:
+    root: INFO
 
 # 2. 环境差异：各环境不同但非敏感
 # application-dev.yml / application-prod.yml
-spring.datasource.url=jdbc:mysql://prod-db:3306/order_db
+spring:
+  datasource:
+    url: jdbc:mysql://prod-db:3306/order_db
 
 # 3. 敏感信息：永远不进代码仓库
 # 环境变量或配置中心
-DB_PASSWORD=xxxx
-REDIS_PASSWORD=xxxx
-JWT_SECRET=xxxx
+DB_PASSWORD: xxxx
+REDIS_PASSWORD: xxxx
+JWT_SECRET: xxxx
 ```
 
 ## 健康检查和优雅停机

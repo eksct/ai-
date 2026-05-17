@@ -23,7 +23,7 @@ Spring Boot：
 ### @SpringBootApplication 是什么？
 
 ```java
-@SpringBootApplication   // = @Configuration + @EnableAutoConfiguration + @ComponentScan
+@SpringBootApplication   // = @SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -82,6 +82,7 @@ public class OrderService {
 ```java
 @Aspect
 @Component
+@Slf4j
 public class LogAspect {
     // 环绕通知：方法执行前后
     @Around("@annotation(loggable)")

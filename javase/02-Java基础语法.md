@@ -39,8 +39,8 @@ long l = i;
 double d = l;
 
 // 强制转换（大→小，可能丢失精度）
-double d = 9.99;
-int i = (int) d;  // → 9（精度丢失）
+double d2 = 9.99;
+int i2 = (int) d2;  // → 9（精度丢失）
 
 // 自动提升
 int a = 3;

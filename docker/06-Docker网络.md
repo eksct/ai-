@@ -62,7 +62,7 @@ docker run -d --name web --network my-network nginx
 docker run -d --name db --network my-network mysql:8.0
 
 # 容器之间可以通过容器名通信（内置 DNS）
-docker exec -it web ping db    # 通过容器名 ping
+docker exec -it web curl http://db   # 通过容器名访问（需 web 镜像有 curl）
 ```
 
 ### 连接/断开网络

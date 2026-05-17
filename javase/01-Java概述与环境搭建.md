@@ -65,7 +65,7 @@ java HelloWorld          # 运行
 | 版本 | 发布日期 | 重要特性 |
 |------|----------|----------|
 | Java 8 | 2014.03 | Lambda, Stream, Optional, 新日期 API |
-| Java 11 (LTS) | 2018.09 | HTTP Client, 模块化, 局部变量类型推断 |
+| Java 11 (LTS) | 2018.09 | 标准化 HttpClient, Nest-Based Access Control |
 | Java 17 (LTS) | 2021.09 | 密封类, 模式匹配, 记录类 |
 | Java 21 (LTS) | 2023.09 | 虚拟线程, 模式匹配 switch, Record Pattern |
 
