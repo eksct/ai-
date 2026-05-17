@@ -68,8 +68,9 @@ java HelloWorld          # 运行
 | Java 11 (LTS) | 2018.09 | 标准化 HttpClient, Nest-Based Access Control |
 | Java 17 (LTS) | 2021.09 | 密封类, 模式匹配, 记录类 |
 | Java 21 (LTS) | 2023.09 | 虚拟线程, 模式匹配 switch, Record Pattern |
+| Java 25 (LTS) | 2025.09 | 值对象 (Value Objects), 模块导入, 字符串模板 |
 
-> **生产建议**：使用 LTS 版本（8 / 11 / 17 / 21），推荐 Java 17+。
+> **生产建议**：使用 LTS 版本（17 / 21 / 25），推荐 Java 25+。
 
 ## IDE 推荐
 
