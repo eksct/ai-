@@ -155,7 +155,7 @@ description: My application Helm chart
 type: application
 version: 1.0.0                 # Chart 版本
 appVersion: "v2.5.1"          # 应用版本
-kubeVersion: ">=1.21.0-0"
+kubeVersion: ">=1.27.0-0"
 
 dependencies:
   - name: mysql

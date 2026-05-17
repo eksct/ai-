@@ -190,7 +190,7 @@ Client ────────────>│  Ingress   │
 
 ```bash
 # Nginx Ingress Controller（最常用）
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/cloud/deploy.yaml
 
 # 其他选择：Traefik, HAProxy, Kong, AWS ALB Ingress Controller
 ```
